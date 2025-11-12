@@ -1,0 +1,10 @@
+{
+  "elimination_screen": {
+    "x": 354,
+    "y": 161,
+    "width": 1192,
+    "height": 193,
+    "type": "text",
+    "description": "Shows when the players whole team was killed and elminated"
+  }
+}

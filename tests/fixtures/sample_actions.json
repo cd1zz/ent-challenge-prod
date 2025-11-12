@@ -1,0 +1,115 @@
+{
+  "video_path": "test_video.mkv",
+  "timestamp": "2024-01-15T10:30:00",
+  "interval_seconds": 2.0,
+  "total_frames": 10,
+  "labels": [
+    "player running",
+    "player jumping",
+    "player shooting",
+    "player parachuting",
+    "player dead"
+  ],
+  "results": [
+    {
+      "timestamp": 0.0,
+      "primary_action": "player parachuting",
+      "top_3_predictions": [
+        {
+          "action": "player parachuting",
+          "probability": 0.92
+        },
+        {
+          "action": "player running",
+          "probability": 0.05
+        },
+        {
+          "action": "player jumping",
+          "probability": 0.02
+        }
+      ],
+      "all_predictions": {
+        "player running": 0.05,
+        "player jumping": 0.02,
+        "player shooting": 0.01,
+        "player parachuting": 0.92,
+        "player dead": 0.0
+      }
+    },
+    {
+      "timestamp": 2.0,
+      "primary_action": "player running",
+      "top_3_predictions": [
+        {
+          "action": "player running",
+          "probability": 0.85
+        },
+        {
+          "action": "player jumping",
+          "probability": 0.1
+        },
+        {
+          "action": "player shooting",
+          "probability": 0.03
+        }
+      ],
+      "all_predictions": {
+        "player running": 0.85,
+        "player jumping": 0.1,
+        "player shooting": 0.03,
+        "player parachuting": 0.01,
+        "player dead": 0.01
+      }
+    },
+    {
+      "timestamp": 4.0,
+      "primary_action": "player shooting",
+      "top_3_predictions": [
+        {
+          "action": "player shooting",
+          "probability": 0.78
+        },
+        {
+          "action": "player running",
+          "probability": 0.15
+        },
+        {
+          "action": "player jumping",
+          "probability": 0.05
+        }
+      ],
+      "all_predictions": {
+        "player running": 0.15,
+        "player jumping": 0.05,
+        "player shooting": 0.78,
+        "player parachuting": 0.01,
+        "player dead": 0.01
+      }
+    },
+    {
+      "timestamp": 18.0,
+      "primary_action": "player dead",
+      "top_3_predictions": [
+        {
+          "action": "player dead",
+          "probability": 0.88
+        },
+        {
+          "action": "player running",
+          "probability": 0.08
+        },
+        {
+          "action": "player shooting",
+          "probability": 0.03
+        }
+      ],
+      "all_predictions": {
+        "player running": 0.08,
+        "player jumping": 0.01,
+        "player shooting": 0.03,
+        "player parachuting": 0.0,
+        "player dead": 0.88
+      }
+    }
+  ]
+}

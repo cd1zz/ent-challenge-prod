@@ -1,0 +1,67 @@
+# Gameplay Analysis Toolkit - Requirements
+# Python 3.8+
+
+# ============================================================================
+# Core Dependencies
+# ============================================================================
+
+# OpenAI API (GPT-4V, GPT-4o)
+openai>=1.0.0
+
+# Environment configuration
+python-dotenv>=1.0.0
+
+# ============================================================================
+# Computer Vision & Image Processing
+# ============================================================================
+
+# Video/Image processing
+opencv-python>=4.8.0
+pillow>=10.0.0
+
+# OCR Engines
+pytesseract>=0.3.10
+
+# PaddleOCR (CPU version - use paddlepaddle-gpu for GPU)
+paddlepaddle>=2.5.0
+paddleocr>=2.7.0
+
+# CLIP for zero-shot classification
+torch>=2.0.0
+torchvision>=0.15.0
+clip @ git+https://github.com/openai/CLIP.git
+
+# CLAP for audio event classification
+laion-clap>=1.1.7
+
+# ============================================================================
+# Audio Processing
+# ============================================================================
+
+# Audio format conversion
+pydub>=0.25.1
+
+# Audio processing for CLAP
+librosa>=0.10.0
+soundfile>=0.12.0
+
+# ============================================================================
+# Data Processing
+# ============================================================================
+
+# Data manipulation
+pandas>=2.0.0
+numpy>=1.24.0
+
+# ============================================================================
+# Optional Dependencies
+# ============================================================================
+
+# For GPU acceleration (uncomment if you have CUDA)
+# paddlepaddle-gpu>=2.5.0
+
+# For development/testing (uncomment as needed)
+# pytest>=7.4.0
+# black>=23.0.0
+# flake8>=6.0.0
+# mypy>=1.5.0

@@ -1,0 +1,148 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                      UI REGIONS SETUP QUICK START                            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+UI regions define WHERE to extract text from your gameplay video.
+You define these rectangular areas once, then OCR extracts text from them.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 REGION FILE FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+JSON file with regions:
+
+{
+  "health": {
+    "x": 50,              # Left edge (pixels from left)
+    "y": 950,             # Top edge (pixels from top)
+    "width": 100,         # Width in pixels
+    "height": 40,         # Height in pixels
+    "type": "number",     # "number" or "text"
+    "description": "Player health value"
+  },
+  "ammo": {
+    "x": 1750,
+    "y": 950,
+    "width": 150,
+    "height": 50,
+    "type": "text",
+    "description": "Current weapon ammo"
+  }
+}
+
+
+🎯 THREE METHODS TO CREATE REGIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+METHOD 1: GPT-4V Automatic Detection ⭐ RECOMMENDED
+─────────────────────────────────────────────────────────────────────────────
+Fastest and most accurate - GPT-4V finds all HUD elements automatically!
+
+Step 1: Extract a reference frame
+  ffmpeg -ss 30 -i video.mkv -vframes 1 reference_frame.png
+
+Step 2: Ask GPT-4V to detect regions
+  (See UI_REGIONS_SETUP_GUIDE.md for Python script)
+
+Cost: ~$0.01 per image (one-time setup)
+Time: ~30 seconds
+Accuracy: Excellent
+
+
+METHOD 2: Interactive Tool
+─────────────────────────────────────────────────────────────────────────────
+Visual click-and-drag interface
+
+Step 1: Extract a reference frame
+  ffmpeg -ss 30 -i video.mkv -vframes 1 reference_frame.png
+
+Step 2: Run interactive annotator
+  (See UI_REGIONS_SETUP_GUIDE.md for Python script)
+
+Step 3: Click and drag to select regions
+  - Click and drag to draw rectangle
+  - Enter region name in terminal
+  - Press 's' to save
+
+Cost: Free
+Time: ~5-10 minutes
+Accuracy: Good (depends on your precision)
+
+
+METHOD 3: Manual Definition
+─────────────────────────────────────────────────────────────────────────────
+Full control, but slower
+
+Step 1: Extract a reference frame
+  ffmpeg -ss 30 -i video.mkv -vframes 1 reference_frame.png
+
+Step 2: Open in image viewer (GIMP, Paint, Preview, etc.)
+  - Hover over HUD elements
+  - Note coordinates shown by viewer
+
+Step 3: Create JSON file manually
+  {
+    "health": {"x": 50, "y": 950, "width": 100, "height": 40, "type": "number"}
+  }
+
+Cost: Free
+Time: ~15-20 minutes
+Accuracy: Good (if careful)
+
+
+⚡ QUICK WORKFLOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# 1. Extract a frame from your video
+ffmpeg -ss 30 -i video.mkv -vframes 1 reference_frame.png
+
+# 2. Use GPT-4V or interactive tool to create regions
+# (See UI_REGIONS_SETUP_GUIDE.md for scripts)
+
+# 3. Test extraction
+python extract_hud_paddleocr.py reference_frame.png \
+  --regions ui_regions.json \
+  -v \
+  -o test.csv
+
+# 4. Check verbose output - does it extract correctly?
+# If not, adjust regions and repeat step 3
+
+# 5. Run on full video once satisfied
+python extract_hud_paddleocr.py video.mkv \
+  --regions ui_regions.json \
+  --gpu \
+  -o hud_data.csv
+
+
+💡 TIPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Add 5-10px padding around text for better OCR
+✓ Test with multiple frames (early game, mid game, late game)
+✓ Make regions large enough for maximum values (999/999 ammo, etc.)
+✓ Use descriptive names (player_health not region1)
+✓ Choose correct type (number vs text)
+
+
+📖 FULL DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+See UI_REGIONS_SETUP_GUIDE.md for:
+  • Complete coordinate system explanation
+  • Full scripts for all three methods
+  • Troubleshooting guide
+  • Resolution scaling
+  • Common region examples (battle royale games)
+  • Testing and validation
+
+
+📦 EXAMPLE FILE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+See example_regions_paddleocr.json for a complete example with 8 regions
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  Full guide: UI_REGIONS_SETUP_GUIDE.md                                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
