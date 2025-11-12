@@ -110,7 +110,7 @@ class AudioClassifier:
         self,
         device: Optional[str] = None,
         labels: Optional[List[str]] = None,
-        ffmpeg_path: str = "/c/Windows/ffmpeg/ffmpeg.exe"
+        ffmpeg_path: str = r"C:\Windows\ffmpeg\ffmpeg.exe"
     ) -> None:
         """Initialize CLAP audio classifier.
 
