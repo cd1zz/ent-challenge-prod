@@ -314,12 +314,40 @@ class ActionClassifier:
         return "uncertain"
 
 
+def _save_checkpoint(checkpoint_file: str, results: List[Dict], video_path: str,
+                    interval_seconds: float, labels: List[str]) -> None:
+    """Save checkpoint data to file."""
+    checkpoint_data = {
+        'video_path': video_path,
+        'interval_seconds': interval_seconds,
+        'labels': labels,
+        'results': results,
+        'last_processed_frame': len(results)
+    }
+    with open(checkpoint_file, 'w', encoding='utf-8') as f:
+        json.dump(checkpoint_data, f, indent=2, ensure_ascii=False)
+
+
+def _load_checkpoint(checkpoint_file: str) -> Optional[Dict]:
+    """Load checkpoint data from file."""
+    if not Path(checkpoint_file).exists():
+        return None
+    try:
+        with open(checkpoint_file, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Warning: Failed to load checkpoint: {e}")
+        return None
+
+
 def classify_video_actions(
     video_path: str,
     interval_seconds: float = 2.0,
     max_frames: Optional[int] = None,
     batch_size: int = 16,
     output_file: Optional[str] = None,
+    checkpoint_file: Optional[str] = None,
+    checkpoint_interval: int = 100,
     verbose: bool = True
 ) -> List[Dict]:
     """Classify actions across an entire video file.
@@ -409,6 +437,12 @@ def classify_video_actions(
                     if verbose:
                         print(f"[{ts:7.1f}s] {top_action} ({top_3[0][1]*100:.1f}%)")
 
+                # Save checkpoint periodically
+                if checkpoint_file and len(results) % checkpoint_interval == 0:
+                    _save_checkpoint(checkpoint_file, results, video_path, interval_seconds, classifier.labels)
+                    if verbose:
+                        print(f"  → Checkpoint saved ({len(results)} frames)")
+
                 batch_frames = []
                 batch_timestamps = []
 
@@ -445,6 +479,12 @@ def classify_video_actions(
 
         if verbose:
             print(f"\n✓ Results saved to: {output_file}")
+
+    # Clean up checkpoint file on successful completion
+    if checkpoint_file and Path(checkpoint_file).exists():
+        Path(checkpoint_file).unlink()
+        if verbose:
+            print(f"✓ Processing complete, checkpoint file removed")
 
     if verbose:
         print(f"\n✓ Classified {len(results)} frames")

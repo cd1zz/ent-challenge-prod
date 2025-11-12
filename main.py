@@ -796,6 +796,9 @@ def cmd_detect_actions(args: argparse.Namespace) -> int:
         if args.verbose:
             print(f"Will save uncertain frames to: {uncertain_dir}\n")
 
+    # Create checkpoint file path
+    checkpoint_path = str(Path(output_path).with_suffix('.checkpoint.json'))
+
     results = []
     batch_frames = []
     batch_timestamps = []
@@ -839,6 +842,20 @@ def cmd_detect_actions(args: argparse.Namespace) -> int:
                     if args.verbose:
                         print(f"[{ts:7.1f}s] {top_action} ({top_confidence*100:.1f}%)")
 
+                # Save checkpoint every 100 frames
+                if len(results) % 100 == 0:
+                    checkpoint_data = {
+                        'video_path': args.video,
+                        'interval_seconds': args.interval,
+                        'labels': classifier.labels,
+                        'results': results,
+                        'last_processed_frame': len(results)
+                    }
+                    with open(checkpoint_path, 'w', encoding='utf-8') as f:
+                        json.dump(checkpoint_data, f, indent=2, ensure_ascii=False)
+                    if args.verbose:
+                        print(f"  → Checkpoint saved ({len(results)} frames)")
+
                 batch_frames = []
                 batch_timestamps = []
 
@@ -880,10 +897,15 @@ def cmd_detect_actions(args: argparse.Namespace) -> int:
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(output_data, f, indent=2, ensure_ascii=False)
 
+    # Clean up checkpoint file on successful completion
+    if Path(checkpoint_path).exists():
+        Path(checkpoint_path).unlink()
+
     if args.verbose:
         print(f"\n✓ Action classification complete")
         print(f"  Classified {len(results)} frames")
         print(f"  Results saved to: {output_path}")
+        print(f"✓ Checkpoint file removed")
 
         # Print summary
         action_counts = {}
