@@ -376,6 +376,7 @@ python main.py detect-audio-events video.mkv --max-duration 300
 - Free (runs locally, no API costs)
 - Customizable event labels
 - Confidence threshold filtering (filter low-confidence predictions)
+- Automatic checkpoint/resume (saves progress every 50 segments)
 - Automatic audio extraction from video using ffmpeg
 - Event distribution summary with top 10 events
 
@@ -384,6 +385,7 @@ python main.py detect-audio-events video.mkv --max-duration 300
 - Extracts 2-second audio segments at 2-second intervals (default)
 - Processes on CUDA GPU for speed
 - Outputs timestamped events with confidence scores
+- Automatic checkpoint/resume: Progress is saved every 50 segments to `.checkpoint.json`. If interrupted, simply re-run the same command to resume from the last checkpoint.
 
 ### 4. Detect Game Boundaries and Outcomes
 
