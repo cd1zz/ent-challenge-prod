@@ -326,6 +326,12 @@ python main.py detect-audio-events video.mkv \
 python main.py detect-audio-events video.mkv \
   --add-labels "reload sounds|grenade throws"
 
+# Filter low-confidence events (show only events with >70% confidence)
+python main.py detect-audio-events video.mkv --threshold 0.7
+
+# Filter with custom threshold (>50%)
+python main.py detect-audio-events video.mkv --threshold 0.5
+
 # Test on first 5 minutes
 python main.py detect-audio-events video.mkv --max-duration 300
 ```
@@ -369,6 +375,7 @@ python main.py detect-audio-events video.mkv --max-duration 300
 - GPU-accelerated (RTX 4070+)
 - Free (runs locally, no API costs)
 - Customizable event labels
+- Confidence threshold filtering (filter low-confidence predictions)
 - Automatic audio extraction from video using ffmpeg
 - Event distribution summary with top 10 events
 
