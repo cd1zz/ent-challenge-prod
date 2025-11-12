@@ -36,22 +36,28 @@ class TestMainCLI:
             explicit_output=None
         )
 
-        assert result == str(Path("output") / "video_actions.json")
+        # Check that output is in output directory and contains base name
+        assert result.startswith("output")
+        assert "video_actions" in result
+        assert result.endswith(".json")
         assert Path("output").exists()
 
     def test_get_output_path_suffix_variations(self, tmp_path, monkeypatch):
         """Test various suffix patterns."""
         monkeypatch.chdir(tmp_path)
 
-        # Test different suffixes
+        # Test different suffixes (now with timestamps)
         result1 = main.get_output_path("test.mkv", "_hud.json")
-        assert result1.endswith("test_hud.json")
+        assert "test_hud" in result1
+        assert result1.endswith(".json")
 
         result2 = main.get_output_path("test.mkv", "_games.json")
-        assert result2.endswith("test_games.json")
+        assert "test_games" in result2
+        assert result2.endswith(".json")
 
         result3 = main.get_output_path("actions.json", "_games.json")
-        assert result3.endswith("actions_games.json")
+        assert "actions_games" in result3
+        assert result3.endswith(".json")
 
     def test_ensure_output_dir(self, tmp_path):
         """Test ensure_output_dir creates necessary directories."""
@@ -80,6 +86,7 @@ class TestMainCLI:
 
     @pytest.mark.parametrize("command", [
         "detect-actions",
+        "detect-audio-events",
         "detect-games",
         "extract-hud",
         "transcribe",

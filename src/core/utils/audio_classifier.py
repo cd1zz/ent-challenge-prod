@@ -271,6 +271,8 @@ class AudioClassifier:
             >>> primary = classifier.get_primary_event(predictions)
             >>> print(f"Primary event: {primary}")
         """
+        if not predictions:
+            return "uncertain"
         return max(predictions.items(), key=lambda x: x[1])[0]
 
     def classify_video_audio(
