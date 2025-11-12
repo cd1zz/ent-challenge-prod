@@ -54,45 +54,56 @@ brew install ffmpeg tesseract python3
 
 ### Python Dependencies
 
-#### Standard Installation (CPU)
+#### Recommended Installation (GPU with CUDA 12.4)
 
-For most users - works on any system:
+For users with NVIDIA GPU and CUDA 12.4+:
 
 ```bash
 # Clone the repository
 git clone <your-repo-url>
 cd ent_challenge_version_2
 
-# Install Python dependencies
-pip install openai python-dotenv opencv-python pillow pytesseract torch pydub paddlepaddle paddleocr
-pip install git+https://github.com/openai/CLIP.git
-pip install laion-clap librosa soundfile
+# Install PyTorch with CUDA support first (REQUIRED for GPU)
+pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+
+# Install remaining dependencies from requirements.txt
+pip install -r requirements.txt
 
 # Set up environment variables
 cp .env.example .env
 # Edit .env and add your OpenAI API key
 ```
 
-#### GPU-Accelerated Installation
+**Note:** The requirements.txt file uses pinned versions to prevent dependency conflicts. PyTorch must be installed separately with the CUDA index URL for GPU support.
 
-For users with NVIDIA GPU and CUDA:
+#### CPU-Only Installation
+
+For systems without GPU (not recommended for performance):
 
 ```bash
 # Clone the repository
 git clone <your-repo-url>
 cd ent_challenge_version_2
 
-# Check CUDA version
-nvidia-smi  # Look for CUDA Version
-
-# Install GPU dependencies
-pip install openai python-dotenv opencv-python pillow pytesseract torch pydub paddlepaddle-gpu paddleocr
-pip install git+https://github.com/openai/CLIP.git
-pip install laion-clap librosa soundfile
+# Install dependencies (PyTorch will be CPU-only)
+pip install -r requirements.txt
 
 # Set up environment variables
 cp .env.example .env
 # Edit .env and add your OpenAI API key
+```
+
+#### Development Installation
+
+For contributors and developers:
+
+```bash
+# Install base dependencies first
+pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+pip install -r requirements.txt
+
+# Install development dependencies (testing, linting, etc.)
+pip install -r requirements-dev.txt
 ```
 
 ### Environment Configuration
