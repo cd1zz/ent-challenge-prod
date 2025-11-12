@@ -1,67 +1,86 @@
 # Gameplay Analysis Toolkit - Requirements
 # Python 3.8+
+#
+# NOTE: Pinned versions to prevent pip dependency backtracking.
+# These versions are tested and known to work together.
 
 # ============================================================================
 # Core Dependencies
 # ============================================================================
 
 # OpenAI API (GPT-4V, GPT-4o)
-openai>=1.0.0
+openai==1.59.9
 
 # Environment configuration
-python-dotenv>=1.0.0
+python-dotenv==1.0.1
 
 # ============================================================================
 # Computer Vision & Image Processing
 # ============================================================================
 
+# IMPORTANT: NumPy version pinned to 1.26.4 for CLAP compatibility
+# This may show a warning with opencv-python but works in practice
+numpy==1.26.4
+
 # Video/Image processing
-opencv-python>=4.8.0
-pillow>=10.0.0
+opencv-python==4.12.0.88
+pillow==11.3.0
 
 # OCR Engines
-pytesseract>=0.3.10
+pytesseract==0.3.13
 
-# PaddleOCR (CPU version - use paddlepaddle-gpu for GPU)
-paddlepaddle>=2.5.0
-paddleocr>=2.7.0
+# PaddleOCR (CPU version)
+paddlepaddle==2.6.2
+paddleocr==2.9.2
 
-# CLIP for zero-shot classification
-torch>=2.0.0
-torchvision>=0.15.0
+# ============================================================================
+# Deep Learning Models (PyTorch)
+# ============================================================================
+
+# IMPORTANT: Install PyTorch with CUDA 12.4 support using:
+# pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+#
+# For CPU-only installation (not recommended):
+# pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0
+
+# PyTorch (pinned for CLIP and CLAP)
+torch==2.6.0
+torchvision==0.21.0
+torchaudio==2.6.0
+
+# CLIP for zero-shot action classification
 clip @ git+https://github.com/openai/CLIP.git
 
 # CLAP for audio event classification
-laion-clap>=1.1.7
+laion-clap==1.1.7
 
 # ============================================================================
 # Audio Processing
 # ============================================================================
 
 # Audio format conversion
-pydub>=0.25.1
+pydub==0.25.1
 
-# Audio processing for CLAP
-librosa>=0.10.0
-soundfile>=0.12.0
+# Audio processing libraries (CLAP dependencies)
+librosa==0.11.0
+soundfile==0.13.1
 
 # ============================================================================
 # Data Processing
 # ============================================================================
 
 # Data manipulation
-pandas>=2.0.0
-numpy>=1.24.0
+pandas==2.3.0
 
 # ============================================================================
-# Optional Dependencies
+# Additional Notes
 # ============================================================================
 
-# For GPU acceleration (uncomment if you have CUDA)
-# paddlepaddle-gpu>=2.5.0
-
-# For development/testing (uncomment as needed)
-# pytest>=7.4.0
-# black>=23.0.0
-# flake8>=6.0.0
-# mypy>=1.5.0
+# GPU Acceleration:
+# - PyTorch: Install with --index-url https://download.pytorch.org/whl/cu124
+# - PaddleOCR GPU: Replace paddlepaddle with paddlepaddle-gpu==2.6.2
+#
+# System Dependencies:
+# - ffmpeg: Required for video/audio processing
+# - tesseract-ocr: Required for pytesseract OCR engine
+# - CUDA 12.4+: Required for GPU acceleration
