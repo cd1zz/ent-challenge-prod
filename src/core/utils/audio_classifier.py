@@ -275,12 +275,59 @@ class AudioClassifier:
             return "uncertain"
         return max(predictions.items(), key=lambda x: x[1])[0]
 
+    def _save_checkpoint(
+        self,
+        checkpoint_file: str,
+        results: List[Dict],
+        video_duration: float,
+        current_time: float
+    ) -> None:
+        """Save checkpoint data to file.
+
+        Args:
+            checkpoint_file: Path to checkpoint file.
+            results: List of classification results so far.
+            video_duration: Total video duration.
+            current_time: Current processing timestamp.
+        """
+        checkpoint_data = {
+            'results': results,
+            'video_duration': video_duration,
+            'last_processed_time': current_time,
+            'labels': self.labels,
+            'num_labels': self.num_labels
+        }
+
+        with open(checkpoint_file, 'w') as f:
+            json.dump(checkpoint_data, f, indent=2)
+
+    def _load_checkpoint(self, checkpoint_file: str) -> Optional[Dict]:
+        """Load checkpoint data from file.
+
+        Args:
+            checkpoint_file: Path to checkpoint file.
+
+        Returns:
+            Checkpoint data dictionary if file exists, None otherwise.
+        """
+        if not Path(checkpoint_file).exists():
+            return None
+
+        try:
+            with open(checkpoint_file, 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Warning: Failed to load checkpoint: {e}")
+            return None
+
     def classify_video_audio(
         self,
         video_path: str,
         interval_seconds: float = 2.0,
         segment_duration: float = 2.0,
         max_duration: Optional[float] = None,
+        checkpoint_file: Optional[str] = None,
+        checkpoint_interval: int = 50,
         verbose: bool = True
     ) -> List[Dict]:
         """Classify audio events throughout a video at regular intervals.
@@ -290,6 +337,8 @@ class AudioClassifier:
             interval_seconds: Time between audio extractions in seconds.
             segment_duration: Duration of each audio segment in seconds.
             max_duration: Optional maximum video duration to process.
+            checkpoint_file: Optional path to checkpoint file for resume capability.
+            checkpoint_interval: Save checkpoint every N segments (default: 50).
             verbose: If True, print progress information.
 
         Returns:
@@ -304,37 +353,53 @@ class AudioClassifier:
             >>> results = classifier.classify_video_audio(
             ...     "gameplay.mp4",
             ...     interval_seconds=2.0,
+            ...     checkpoint_file="progress.json",
             ...     verbose=True
             ... )
             >>> for result in results[:5]:
             ...     print(f"{result['timestamp']}s: {result['primary_event']} ({result['confidence']:.2f})")
         """
-        # Get video duration
-        cmd = [
-            self.ffmpeg_path,
-            "-i", video_path
-        ]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-
-        # Parse duration from ffmpeg output
-        duration_line = [line for line in result.stderr.split('\n') if 'Duration' in line]
-        if duration_line:
-            duration_str = duration_line[0].split('Duration:')[1].split(',')[0].strip()
-            h, m, s = duration_str.split(':')
-            video_duration = int(h) * 3600 + int(m) * 60 + float(s)
-        else:
-            raise RuntimeError("Could not determine video duration")
-
-        if max_duration:
-            video_duration = min(video_duration, max_duration)
-
-        if verbose:
-            print(f"Video duration: {video_duration:.1f}s")
-            print(f"Processing audio at {interval_seconds}s intervals...\n")
-
+        # Try to load checkpoint if provided
         results = []
         current_time = 0.0
+        if checkpoint_file:
+            checkpoint = self._load_checkpoint(checkpoint_file)
+            if checkpoint:
+                results = checkpoint['results']
+                current_time = checkpoint['last_processed_time'] + interval_seconds
+                video_duration = checkpoint['video_duration']
+                if verbose:
+                    print(f"✓ Resumed from checkpoint: {len(results)} segments completed")
+                    print(f"  Continuing from {current_time:.1f}s...\n")
+            else:
+                if verbose:
+                    print("No checkpoint found, starting from beginning\n")
 
+        # Get video duration (if not loaded from checkpoint)
+        if 'video_duration' not in locals():
+            cmd = [
+                self.ffmpeg_path,
+                "-i", video_path
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+
+            # Parse duration from ffmpeg output
+            duration_line = [line for line in result.stderr.split('\n') if 'Duration' in line]
+            if duration_line:
+                duration_str = duration_line[0].split('Duration:')[1].split(',')[0].strip()
+                h, m, s = duration_str.split(':')
+                video_duration = int(h) * 3600 + int(m) * 60 + float(s)
+            else:
+                raise RuntimeError("Could not determine video duration")
+
+            if max_duration:
+                video_duration = min(video_duration, max_duration)
+
+            if verbose:
+                print(f"Video duration: {video_duration:.1f}s")
+                print(f"Processing audio at {interval_seconds}s intervals...\n")
+
+        segment_count = 0
         while current_time < video_duration:
             # Extract audio segment
             audio_path = self.extract_audio_segment(
@@ -363,5 +428,18 @@ class AudioClassifier:
                 print(f"[{current_time:7.1f}s] {top_event} ({top_confidence*100:.1f}%)")
 
             current_time += interval_seconds
+            segment_count += 1
+
+            # Save checkpoint periodically
+            if checkpoint_file and segment_count % checkpoint_interval == 0:
+                self._save_checkpoint(checkpoint_file, results, video_duration, current_time - interval_seconds)
+                if verbose:
+                    print(f"  → Checkpoint saved ({len(results)} segments)")
+
+        # Clean up checkpoint file on successful completion
+        if checkpoint_file and Path(checkpoint_file).exists():
+            Path(checkpoint_file).unlink()
+            if verbose:
+                print(f"\n✓ Processing complete, checkpoint file removed")
 
         return results

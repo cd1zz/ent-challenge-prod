@@ -1114,12 +1114,17 @@ def cmd_detect_audio_events(args: argparse.Namespace) -> int:
     # Initialize classifier
     classifier = AudioClassifier(labels=custom_labels)
 
-    # Run CLAP classification
+    # Create checkpoint file path (same directory as output, with .checkpoint suffix)
+    checkpoint_path = str(Path(output_path).with_suffix('.checkpoint.json'))
+
+    # Run CLAP classification with checkpoint support
     results = classifier.classify_video_audio(
         video_path=args.video,
         interval_seconds=args.interval,
         segment_duration=args.segment_duration,
         max_duration=args.max_duration,
+        checkpoint_file=checkpoint_path,
+        checkpoint_interval=50,  # Save every 50 segments
         verbose=args.verbose
     )
 
