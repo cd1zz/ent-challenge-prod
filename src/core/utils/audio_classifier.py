@@ -296,6 +296,7 @@ class AudioClassifier:
             List of classification results, each containing:
                 - timestamp: Time in seconds
                 - primary_event: Top event label
+                - confidence: Confidence score for primary event (0.0-1.0)
                 - top_3_predictions: List of top 3 events with probabilities
                 - all_predictions: Dict of all event probabilities
 
@@ -306,7 +307,7 @@ class AudioClassifier:
             ...     verbose=True
             ... )
             >>> for result in results[:5]:
-            ...     print(f"{result['timestamp']}s: {result['primary_event']}")
+            ...     print(f"{result['timestamp']}s: {result['primary_event']} ({result['confidence']:.2f})")
         """
         # Get video duration
         cmd = [
@@ -353,6 +354,7 @@ class AudioClassifier:
             results.append({
                 'timestamp': current_time,
                 'primary_event': top_event,
+                'confidence': float(top_confidence),
                 'top_3_predictions': [{'event': e, 'probability': p} for e, p in top_3],
                 'all_predictions': predictions
             })

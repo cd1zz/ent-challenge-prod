@@ -454,6 +454,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         help='Add labels to defaults (pipe-separated)'
     )
     audio_parser.add_argument(
+        '--threshold',
+        type=float,
+        default=0.0,
+        help='Minimum confidence threshold (0.0-1.0, default: 0.0 shows all events)'
+    )
+    audio_parser.add_argument(
         '--max-duration',
         type=float,
         help='Maximum video duration to process in seconds'
@@ -1101,6 +1107,8 @@ def cmd_detect_audio_events(args: argparse.Namespace) -> int:
         print(f"Output: {output_path}")
         print(f"Sample interval: {args.interval}s")
         print(f"Segment duration: {args.segment_duration}s")
+        if args.threshold > 0:
+            print(f"Confidence threshold: {args.threshold:.2f}")
         print("="*70)
 
     # Initialize classifier
@@ -1115,14 +1123,24 @@ def cmd_detect_audio_events(args: argparse.Namespace) -> int:
         verbose=args.verbose
     )
 
+    # Apply confidence threshold filtering
+    total_segments = len(results)
+    if args.threshold > 0:
+        results = [r for r in results if r['confidence'] >= args.threshold]
+        if args.verbose and total_segments > len(results):
+            print(f"\n  Filtered {total_segments - len(results)} low-confidence events (threshold: {args.threshold:.2f})")
+
     # Save results
     output_data = {
         'video_path': args.video,
         'timestamp': datetime.now().isoformat(),
         'interval_seconds': args.interval,
         'segment_duration': args.segment_duration,
+        'confidence_threshold': args.threshold,
         'labels': classifier.labels,
-        'events': results
+        'events': results,
+        'total_segments_analyzed': total_segments,
+        'events_above_threshold': len(results)
     }
 
     with open(output_path, 'w') as f:
@@ -1131,7 +1149,9 @@ def cmd_detect_audio_events(args: argparse.Namespace) -> int:
     # Print summary
     if args.verbose:
         print(f"\n✓ Audio event classification complete")
-        print(f"  Classified {len(results)} segments")
+        print(f"  Analyzed {total_segments} segments")
+        if args.threshold > 0:
+            print(f"  Events above threshold: {len(results)}")
         print(f"  Results saved to: {output_path}")
 
         # Event distribution
